@@ -4,6 +4,7 @@ import io.github.vertickt.duelSystem.utils.Duel
 import io.github.vertickt.duelSystem.utils.addCommand
 import io.github.vertickt.duelSystem.utils.addHover
 import io.github.vertickt.duelSystem.utils.cmp
+import io.github.vertickt.duelSystem.utils.plus
 import net.axay.kspigot.chat.KColors
 import net.axay.kspigot.commands.argument
 import net.axay.kspigot.commands.command
@@ -12,6 +13,7 @@ import net.axay.kspigot.commands.runs
 import net.axay.kspigot.commands.suggestList
 import net.axay.kspigot.extensions.onlinePlayers
 import net.axay.kspigot.extensions.server
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
 
 class DuelCommand {
@@ -23,22 +25,28 @@ class DuelCommand {
             runs {
                 val target = getTarget(getArgument<String>("player"), player) ?: return@runs
                 if (target == player) {
-                        player.sendMessage(cmp("Du kannst dir nicht selber eine Anfrage senden!", KColors.INDIANRED))
-                        return@runs
+                    player.sendMessage(cmp("You cannot send a request to yourself!", KColors.INDIANRED))
+                    return@runs
                 }
 
                 if (requests[player] == target) {
-                    player.sendMessage(cmp("Du hast diesem Spieler bereits eine Duel anfrage gesendet!", KColors.INDIANRED))
+                    player.sendMessage(cmp("You have already sent a duel request to this player!", KColors.INDIANRED))
                     return@runs
                 }
 
                 requests[player] = target
-                target.sendMessage(cmp("Du hast eine Duel anfrage von ${player.name} erhalten.", KColors.SKYBLUE)
-                    .addCommand("duel ${player.name} accept")
-                    .addHover(cmp("accept ${player.name}", KColors.ALICEBLUE)))
-                player.sendMessage(cmp("Du hast ${target.name} eine Anfrage gesendet.", KColors.SKYBLUE)
-                    .addCommand("duel ${target.name} decline")
-                    .addHover(cmp("decline ${target.name}", KColors.ALICEBLUE)))
+                target.sendMessage(
+                    cmp("You have received a duel request from ${player.name}") +
+                            cmp(" [Accept]", NamedTextColor.GREEN)
+                                .addCommand("duel ${player.name} accept")
+                                .addHover(cmp("Click to accept the request from ${player.name}"))
+                )
+                player.sendMessage(
+                    cmp("You have sent a request to ${target.name}") +
+                            cmp(" [Cancel]", NamedTextColor.RED)
+                                .addCommand("duel ${target.name} decline")
+                                .addHover(cmp("Click to cancel the request to ${target.name}"))
+                )
             }
 
             literal("accept") {
@@ -48,7 +56,7 @@ class DuelCommand {
                         requests.remove(target, player)
                         Duel(target, player)
                     } else {
-                        player.sendMessage(cmp("Du hast keine Anfrage von diesem Spieler.", KColors.INDIANRED))
+                        player.sendMessage(cmp("You don’t have a request from this player.", KColors.INDIANRED))
                     }
                 }
             }
@@ -57,9 +65,9 @@ class DuelCommand {
                     val target = getTarget(getArgument<String>("player"), player) ?: return@runs
                     if (requests[player] == target) {
                         requests.remove(player, target)
-                        player.sendMessage(cmp("Du hast die Anfrage für ${target.name} zurückgezogen", KColors.ALICEBLUE))
+                        player.sendMessage(cmp("You have withdrawn the request for ${target.name}", KColors.ALICEBLUE))
                     } else {
-                        player.sendMessage(cmp("Du hast diesem Spieler keine Anfrage gesendet!", KColors.INDIANRED))
+                        player.sendMessage(cmp("You haven’t sent a request to this player!", KColors.INDIANRED))
                     }
                 }
             }
@@ -68,11 +76,11 @@ class DuelCommand {
     fun getTarget(string: String, player: Player) : Player? {
         val target = server.getPlayer(string)
         if (target == null) {
-            player.sendMessage(cmp("Der Spieler ist nicht Online!", KColors.INDIANRED))
+            player.sendMessage(cmp("That player is not online!", KColors.INDIANRED))
             return null
         }
         if (player.world.name.startsWith("duel-")) {
-            player.sendMessage(cmp("Du befindest dich in einem Duel!", KColors.INDIANRED))
+            player.sendMessage(cmp("You are currently in a duel!", KColors.INDIANRED))
             return null
         }
         return target

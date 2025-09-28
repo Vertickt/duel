@@ -1,5 +1,8 @@
 package io.github.vertickt.duelSystem.utils
 
+import net.axay.kspigot.items.itemStack
+import net.axay.kspigot.items.meta
+import net.axay.kspigot.items.name
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.event.ClickEvent
@@ -9,10 +12,17 @@ import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.kyori.adventure.translation.GlobalTranslator
+import org.bukkit.Color
+import org.bukkit.FireworkEffect
+import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.attribute.Attribute
+import org.bukkit.entity.Firework
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.FireworkMeta
 import java.util.*
+import kotlin.random.Random
 
 /**
  * Returns a [Component] from a [String]
@@ -115,6 +125,7 @@ fun Component.decorate(
 
 
 fun resetPlayer(player: Player) {
+    player.arrowsInBody = 0
     player.inventory.clear()
     player.inventory.armorContents = emptyArray<ItemStack?>()
     player.enderChest.clear()
@@ -133,4 +144,50 @@ fun resetPlayer(player: Player) {
         player.removePotionEffect(effect.type)
     }
     player.isInvulnerable = false
+}
+
+fun hasTotem(player: Player): Boolean {
+    val inv = player.inventory
+    return inv.itemInMainHand.type == Material.TOTEM_OF_UNDYING ||
+            inv.itemInOffHand.type == Material.TOTEM_OF_UNDYING
+}
+
+fun spawnRandomFireworkAbove(location: Location) {
+    val world = location.world ?: return
+    val firework = world.spawn(location.add(0.0, 2.0, 0.0), Firework::class.java)
+
+    val meta = firework.fireworkMeta
+    meta.power = 0
+
+
+    val primary = Color.fromRGB(
+        Random.nextInt(256),
+        Random.nextInt(256),
+        Random.nextInt(256)
+    )
+
+    val fade = Color.fromRGB(
+        Random.nextInt(256),
+        Random.nextInt(256),
+        Random.nextInt(256)
+    )
+
+    val effect = FireworkEffect.builder()
+        .with(FireworkEffect.Type.BURST)
+        .withColor(primary)
+        .withFade(fade)
+        .trail(true)
+        .flicker(true)
+        .build()
+
+    meta.addEffect(effect)
+    firework.fireworkMeta = meta
+}
+
+fun giveLobbyItems(player: Player) {
+    player.inventory.setItem(8, itemStack(Material.SKELETON_SKULL) {
+        meta {
+            name = cmp("Spectate", NamedTextColor.GRAY)
+        }
+    })
 }

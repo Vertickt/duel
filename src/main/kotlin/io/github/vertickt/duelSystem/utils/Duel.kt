@@ -1,17 +1,19 @@
 package io.github.vertickt.duelSystem.utils
 
+import io.github.vertickt.duelSystem.DuelSystem
 import net.axay.kspigot.chat.KColors
 import net.axay.kspigot.event.listen
 import net.axay.kspigot.event.unregister
 import net.axay.kspigot.extensions.broadcast
 import net.axay.kspigot.extensions.server
 import net.axay.kspigot.runnables.task
+import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.title.Title
 import net.kyori.adventure.title.TitlePart
+import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.Sound
 import org.bukkit.WorldCreator
-import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -41,6 +43,7 @@ class Duel(
         val victim = it.entity
         if (victim != p1 && victim != p2) return@listen
         if ((victim as Player).health - it.finalDamage > 0) return@listen
+        if (hasTotem(victim)) return@listen
         it.damage = 0.0
         var winner = when (victim) {
             p1 -> p2
@@ -72,11 +75,18 @@ class Duel(
     }
 
     fun win(player: Player, winner: Player) {
+        onQuit.unregister()
+        //broadcast(MiniMessage.miniMessage().deserialize("<${player.name}> <yellow><b><obf>WW</obf> <gold>GG <yellow><b><obf>WW"))
         player.inventory.clear()
         player.sendTitlePart(TitlePart.TIMES, Title.Times.times(ofSeconds(0), ofSeconds(3), ofSeconds(1)))
-        player.sendTitlePart(TitlePart.SUBTITLE, cmp("hat gewonnen", KColors.ALICEBLUE))
+        player.sendTitlePart(TitlePart.SUBTITLE, cmp("won", KColors.ALICEBLUE))
         player.sendTitlePart(TitlePart.TITLE, cmp(winner.name, KColors.ALICEBLUE, true))
         player.playSound(player.location, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, 1f)
+        player.teleportAsync(player.location.add(0.0, 0.001, 0.0))
+        player.allowFlight = true
+        player.isFlying = true
+
+        spawnRandomFireworkAbove(winner.location)
     }
 
 
@@ -84,9 +94,21 @@ class Duel(
         FileUtils.copyDirectoryStructure(File("duel-template"), File(duelWorldName))
         server.createWorld(WorldCreator.name(duelWorldName))
 
-        p1.teleportAsync(Location(server.getWorld(duelWorldName), 10.5, 100.0, 0.5, 90f, 0f))
-        p2.teleportAsync(Location(server.getWorld(duelWorldName), -10.5, 100.0, 0.5, -90f, 0f))
+        p1.teleportAsync(Location(server.getWorld(duelWorldName), 10.5, 101.0, 0.5, 90f, 0f))
+        p2.teleportAsync(Location(server.getWorld(duelWorldName), -10.5, 101.0, 0.5, -90f, 0f))
 
+        task(delay = 10) {
+            val contentsList = DuelSystem.instance.config.getList("contents")?.map { it as? ItemStack }?.toTypedArray()
+            val armorList = DuelSystem.instance.config.getList("armor")?.map { it as? ItemStack }?.toTypedArray()
+            players.forEach { p ->
+                resetPlayer(p)
+                p.gameMode = GameMode.SURVIVAL
+                if (contentsList != null) p.inventory.contents = contentsList
+                if (armorList != null) p.inventory.armorContents = armorList
+
+                p.playSound(p.location, Sound.ENTITY_PLAYER_LEVELUP, 0.6f, 2f)
+            }
+        }
         timer()
     }
 
@@ -109,18 +131,18 @@ class Duel(
             players.forEach { p ->
                 p.teleportAsync(Location(server.getWorld("world"), 0.5, 100.0, 0.5, 0f, 0f))
                 resetPlayer(p)
+                p.gameMode = GameMode.ADVENTURE
+                giveLobbyItems(p)
             }
-            server.unloadWorld(server.getWorld(duelWorldName) ?: return@task, false)
+            server.unloadWorld(duelWorldName, false)
             FileUtils.deleteDirectory(duelWorldName)
             onDamage.unregister()
-            onQuit.unregister()
         }
     }
 
 
-
     init {
-        broadcast("Starting duel between ${p1.name} and ${p2.name}")
+        broadcast("${p1.name} is now dueling ${p2.name}")
         time = 5.minutes
         startDuel()
     }
