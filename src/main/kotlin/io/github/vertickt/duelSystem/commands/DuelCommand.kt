@@ -66,7 +66,7 @@ class DuelCommand {
                     val target = getTarget(getArgument<String>("player"), player) ?: return@runs
                     if (requests[player]?.contains(target) == true) {
                         requests[player]?.remove(target)
-                        player.sendMessage(cmp("You have withdrawn the request for ${target.name}", KColors.ALICEBLUE))
+                        player.sendMessage(cmp("You have canceled the request for ${target.name}", KColors.ALICEBLUE))
                     } else {
                         player.sendMessage(cmp("You haven’t sent a request to this player!", KColors.INDIANRED))
                     }
