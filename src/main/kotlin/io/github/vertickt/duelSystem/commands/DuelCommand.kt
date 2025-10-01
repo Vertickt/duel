@@ -17,7 +17,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
 
 class DuelCommand {
-    val requests = mutableMapOf<Player, Player>()
+    val requests = mutableMapOf<Player, MutableSet<Player>>()
 
     val duelCommand = command("duel") {
         argument<String>("player") {
