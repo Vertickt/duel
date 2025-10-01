@@ -28,8 +28,7 @@ class DuelCommand {
                     player.sendMessage(cmp("You cannot send a request to yourself!", KColors.INDIANRED))
                     return@runs
                 }
-
-                if (requests[player] == target) {
+                if (requests[player]?.contains(target) == true) {
                     player.sendMessage(cmp("You have already sent a duel request to this player!", KColors.INDIANRED))
                     return@runs
                 }
