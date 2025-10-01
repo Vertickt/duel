@@ -42,6 +42,10 @@ class Duel(
         }
         val victim = it.entity
         if (victim != p1 && victim != p2) return@listen
+        if (cancelTimer) {
+            it.isCancelled = true
+            return@listen
+        }
         if ((victim as Player).health - it.finalDamage > 0) return@listen
         if (hasTotem(victim)) return@listen
         it.damage = 0.0
