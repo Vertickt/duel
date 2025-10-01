@@ -50,8 +50,12 @@ class DuelCommand {
             literal("accept") {
                 runs {
                     val target = getTarget(getArgument<String>("player"), player) ?: return@runs
-                    if (requests[target] == player) {
-                        requests.remove(target, player)
+                    if (target.world.name.startsWith("duel-")) {
+                        player.sendMessage(cmp("This Player cannot be challenged currently", KColors.INDIANRED))
+                        return@runs
+                    }
+                    if (requests[target]?.contains(player) == true) {
+                        requests[target]?.remove(player)
                         Duel(target, player)
                     } else {
                         player.sendMessage(cmp("You don’t have a request from this player.", KColors.INDIANRED))
