@@ -32,8 +32,7 @@ class DuelCommand {
                     player.sendMessage(cmp("You have already sent a duel request to this player!", KColors.INDIANRED))
                     return@runs
                 }
-
-                requests[player] = target
+                requests.computeIfAbsent(player) { mutableSetOf() }.add(target)
                 target.sendMessage(
                     cmp("You have received a duel request from ${player.name}") +
                             cmp(" [Accept]", NamedTextColor.GREEN)
