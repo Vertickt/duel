@@ -29,6 +29,14 @@ class DuelSystem : KSpigot() {
     }
 
     override fun shutdown() {
-        // Plugin shutdown logic
+        val pluginFolder = dataFolder
+        if (pluginFolder.exists() && pluginFolder.isDirectory) {
+            pluginFolder.listFiles()?.forEach { file ->
+                if (file.isDirectory && file.name.startsWith("duel-") && file.name != "duel-template") {
+                    file.deleteRecursively()
+                    logger.info("Deleted world (${file.name}).")
+                }
+            }
+        }
     }
 }
