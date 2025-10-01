@@ -81,6 +81,7 @@ class Duel(
     fun win(player: Player, winner: Player) {
         onQuit.unregister()
         //broadcast(MiniMessage.miniMessage().deserialize("<${player.name}> <yellow><b><obf>WW</obf> <gold>GG <yellow><b><obf>WW"))
+        broadcast("${winner.name} defeated ${looser.name}")
         player.inventory.clear()
         player.sendTitlePart(TitlePart.TIMES, Title.Times.times(ofSeconds(0), ofSeconds(3), ofSeconds(1)))
         player.sendTitlePart(TitlePart.SUBTITLE, cmp("won", KColors.ALICEBLUE))
