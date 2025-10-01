@@ -185,9 +185,11 @@ fun spawnRandomFireworkAbove(location: Location) {
 }
 
 fun giveLobbyItems(player: Player) {
-    player.inventory.setItem(8, itemStack(Material.SKELETON_SKULL) {
-        meta {
-            name = cmp("Spectate", NamedTextColor.GRAY)
-        }
-    })
+    player.inventory.setItem(8, spectateItem)
+}
+
+val spectateItem = itemStack(Material.SKELETON_SKULL) {
+    meta {
+        name = cmp("Spectate", NamedTextColor.GRAY)
+    }
 }

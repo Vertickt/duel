@@ -7,7 +7,6 @@ import net.axay.kspigot.event.unregister
 import net.axay.kspigot.extensions.broadcast
 import net.axay.kspigot.extensions.server
 import net.axay.kspigot.runnables.task
-import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.title.Title
 import net.kyori.adventure.title.TitlePart
 import org.bukkit.GameMode
@@ -36,10 +35,6 @@ class Duel(
     val players = listOf(p1, p2)
 
     val onDamage = listen<EntityDamageEvent> {
-        if (cancelTimer) {
-            it.isCancelled = true
-            return@listen
-        }
         val victim = it.entity
         if (victim != p1 && victim != p2) return@listen
         if (cancelTimer) {
@@ -55,7 +50,7 @@ class Duel(
             else -> return@listen
         }
         players.forEach { p ->
-            win(p, winner)
+            win(p, winner, victim)
         }
         stop()
     }
@@ -69,7 +64,7 @@ class Duel(
             else -> return@listen
         }
         players.forEach { p ->
-            win(p, winner)
+            win(p, winner, player)
         }
         stop()
     }
@@ -78,7 +73,7 @@ class Duel(
         return java.time.Duration.ofSeconds(long)
     }
 
-    fun win(player: Player, winner: Player) {
+    fun win(player: Player, winner: Player, looser: Player) {
         onQuit.unregister()
         //broadcast(MiniMessage.miniMessage().deserialize("<${player.name}> <yellow><b><obf>WW</obf> <gold>GG <yellow><b><obf>WW"))
         broadcast("${winner.name} defeated ${looser.name}")
@@ -139,8 +134,6 @@ class Duel(
                 p.gameMode = GameMode.ADVENTURE
                 giveLobbyItems(p)
             }
-            server.unloadWorld(duelWorldName, false)
-            FileUtils.deleteDirectory(duelWorldName)
             onDamage.unregister()
         }
     }

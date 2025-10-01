@@ -46,7 +46,6 @@ class DuelCommand {
                                 .addHover(cmp("Click to cancel the request to ${target.name}"))
                 )
             }
-
             literal("accept") {
                 runs {
                     val target = getTarget(getArgument<String>("player"), player) ?: return@runs

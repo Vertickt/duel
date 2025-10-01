@@ -1,9 +1,10 @@
 package io.github.vertickt.duelSystem
 
 import io.github.vertickt.duelSystem.commands.DuelCommand
+import io.github.vertickt.duelSystem.commands.GetKitCommand
 import io.github.vertickt.duelSystem.commands.SetKitCommand
+import io.github.vertickt.duelSystem.guis.SpectateGui
 import io.github.vertickt.duelSystem.listeners.OnJoin
-import io.github.vertickt.duelSystem.utils.Duel
 import net.axay.kspigot.main.KSpigot
 import org.bukkit.Difficulty
 
@@ -23,9 +24,11 @@ class DuelSystem : KSpigot() {
         //commands
         DuelCommand()
         SetKitCommand()
+        GetKitCommand()
 
         //events
         OnJoin
+        SpectateGui
     }
 
     override fun shutdown() {

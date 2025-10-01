@@ -1,7 +1,6 @@
 package io.github.vertickt.duelSystem.commands
 
 import io.github.vertickt.duelSystem.DuelSystem
-import io.github.vertickt.duelSystem.utils.KitStorage
 import net.axay.kspigot.commands.command
 import net.axay.kspigot.commands.requiresPermission
 import net.axay.kspigot.commands.runs

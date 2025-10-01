@@ -30,7 +30,7 @@ tasks {
     }
 
     assemble {
-        dependsOn(reobfJar)
+        //dependsOn(reobfJar)
     }
     compileJava {
         options.encoding = "UTF-8"
