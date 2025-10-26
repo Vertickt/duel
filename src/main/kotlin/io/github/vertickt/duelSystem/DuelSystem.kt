@@ -8,7 +8,6 @@ import io.github.vertickt.duelSystem.listeners.OnJoin
 import net.axay.kspigot.main.KSpigot
 import org.bukkit.Difficulty
 
-
 class DuelSystem : KSpigot() {
     companion object {
         lateinit var instance: DuelSystem

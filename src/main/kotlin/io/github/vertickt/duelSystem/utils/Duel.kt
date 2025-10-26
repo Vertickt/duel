@@ -10,6 +10,7 @@ import net.axay.kspigot.runnables.task
 import net.kyori.adventure.title.Title
 import net.kyori.adventure.title.TitlePart
 import org.bukkit.GameMode
+import org.bukkit.GameRule
 import org.bukkit.Location
 import org.bukkit.Sound
 import org.bukkit.WorldCreator
@@ -92,12 +93,14 @@ class Duel(
 
     fun startDuel() {
         FileUtils.copyDirectoryStructure(File("duel-template"), File(duelWorldName))
-        server.createWorld(WorldCreator.name(duelWorldName))
+        val world = server.createWorld(WorldCreator.name(duelWorldName))
+        world?.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false)
 
         p1.teleportAsync(Location(server.getWorld(duelWorldName), 10.5, 101.0, 0.5, 90f, 0f))
         p2.teleportAsync(Location(server.getWorld(duelWorldName), -10.5, 101.0, 0.5, -90f, 0f))
 
         task(delay = 10) {
+            DuelSystem.instance.reloadConfig()
             val contentsList = DuelSystem.instance.config.getList("contents")?.map { it as? ItemStack }?.toTypedArray()
             val armorList = DuelSystem.instance.config.getList("armor")?.map { it as? ItemStack }?.toTypedArray()
             players.forEach { p ->
@@ -119,6 +122,10 @@ class Duel(
             players.forEach { it.sendActionBar(cmp(time.toString(), KColors.ALICEBLUE, true)) }
             time -= 1.seconds
             if (time <= 0.seconds) {
+                players.forEach { player ->
+                    player.sendTitlePart(TitlePart.TIMES, Title.Times.times(ofSeconds(0), ofSeconds(3), ofSeconds(1)))
+                    player.sendTitlePart(TitlePart.TITLE, cmp("Draw", KColors.ALICEBLUE, true))
+                }
                 stop()
                 it.cancel()
             }
@@ -127,6 +134,7 @@ class Duel(
 
     fun stop() {
         cancelTimer = true
+        onQuit.unregister()
         task(delay = 20 * 6) {
             players.forEach { p ->
                 p.teleportAsync(Location(server.getWorld("world"), 0.5, 100.0, 0.5, 0f, 0f))

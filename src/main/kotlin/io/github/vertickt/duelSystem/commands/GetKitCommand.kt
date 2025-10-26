@@ -10,6 +10,7 @@ class GetKitCommand {
     val getKit = command("getkit") {
         requiresPermission("duel.command.getkit")
         runs {
+            DuelSystem.instance.reloadConfig()
             val contentsList = DuelSystem.instance.config.getList("contents")?.map { it as? ItemStack }?.toTypedArray()
             val armorList = DuelSystem.instance.config.getList("armor")?.map { it as? ItemStack }?.toTypedArray()
             if (contentsList != null) player.inventory.contents = contentsList
